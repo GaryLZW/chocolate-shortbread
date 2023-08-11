@@ -27,4 +27,4 @@ def coord_number(atoms, a=3.615, lattice='fcc'):
       #Append coordination number to the list every time the second j loop finishes.  
       cn_list.append(cn)
    
-   return CN
+   return cn_list
