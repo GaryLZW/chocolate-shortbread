@@ -5,7 +5,7 @@ def coord_number(atoms, a=3.615, lattice='fcc'):
    #Possible error if have different decimal points?
    #Should we use the smallest non-zero value from distances?
    if lattice == 'fcc':
-       bond = a / 2 ** 0.5
+       bond = round(a / 2 ** 0.5,3)
    distances = atoms.get_all_distances()
    
    
