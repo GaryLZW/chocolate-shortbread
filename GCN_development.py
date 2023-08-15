@@ -33,11 +33,43 @@ def coord_number(atoms, a=3.615, lattice='fcc'):
 
     return cn_list, fnn_list
 
+def general_coord_number(atoms, a, lattice, site):
+    """
+    :param atoms: Surface model (should be large enough, e.g.(3*3*3))
+    :param a: lattice parameter
+    :param lattice: crystal structure
+    :param site: list of atomic indices that consist the adsorption site.
+    :return:
+    """
+
+    cn_record, fnn_record = coord_number(atoms, a, lattice)
+    element = atoms[0].symbol
+    cn_max = 12
+
+    fnn_site = []
+    for index in site:
+        fnn_site += fnn_record[index]
+    # Removing duplicate elements in fnn_site
+    fnn_site_set = list(set(fnn_site))
+
+    # Summation of CNs of first nearest numbers of the adsorption site
+    # This should work for both single atom site and
+    sum_cn = 0
+    for index in fnn_site_set:
+        sum_cn += cn_record[index]
+
+    gcn = sum_cn / cn_max
+
+    return gcn
+
+
+
+
 
 from ase.build import bulk, fcc111
 
 Cu = bulk('Cu', crystalstructure='fcc', a=3.615, cubic=True)
 Cu = Cu.repeat((2, 2, 2))
 Cu111 = fcc111('Cu', a=3.615, size=(3, 3, 3), vacuum=10, periodic=True)
-cn_list, fnn_list = coord_number(Cu111, a=3.615, lattice='fcc')
-print(cn_list)
+gcn_fcc111 = general_coord_number(Cu111, a=3.615, lattice='fcc', site=[Cu111[-1].index])
+print(gcn_fcc111)
