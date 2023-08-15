@@ -42,7 +42,7 @@ from math import sqrt
 
 ## Create surface
 Cubulk = bulk('Cu', 'fcc', a=3.590, cubic=True)
-slab = surface(Cubulk, (2, 2, 1), 4)
+slab = surface(Cubulk, (2, 1, 0), 4)
 slab.center(vacuum=10.0, axis=2)
 # slab = fcc111(atomic_species, a=a_eos,
 # size=(unit_cell_width,unit_cell_depth,slab_depth),
@@ -50,11 +50,11 @@ slab.center(vacuum=10.0, axis=2)
 
 
 ## Set constraint for surface/bulk characteristics
-top_layers = 2  # leave x top layers relaxed
-mask0 = [atom.tag > top_layers for atom in slab]
-constraint0 = FixAtoms(mask=mask0)
+#top_layers = 2  # leave x top layers relaxed
+#mask0 = [atom.tag > top_layers for atom in slab]
+#constraint0 = FixAtoms(mask=mask0)
 
-slab.set_constraint([constraint0])
+#slab.set_constraint([constraint0])
 
 if emt:
     slab.set_calculator(EMT())
@@ -79,24 +79,27 @@ e_opt_surface = slab.get_potential_energy()
 slab.set_constraint()
 
 ## If build using ase.build can specify adsorption sites
-add_adsorbate(slab, molecule1, 3.0, (slab[-1].x, slab[-1].y))
-#view(slab)
+add_adsorbate(slab, molecule1, 4.0, (slab[-1].x, slab[-1].y))
 ## Otherwise x-y coordinates - offset is specified in Angstrom
 # add_adsorbate(slab, molecule, 2.0, position=(4.0, 2.4))
 
 ## Generate a new mask based on the changed number of atoms and constrain last two layers
 #mask0 = [atom.tag > top_layers for atom in slab]
 #constraint0 = FixAtoms(mask=mask0)
-#Uncomment these lines to constrain the relaxation of adsorbate to the z axis
-#indices1 = [atom.index for atom in slab if atom.symbol == 'C' or atom.symbol == 'O']
-#constraint1 = FixedLine(indices1[0], direction=[0, 0, 1])
-#if len(molecule1) == 2:
-    #constraint2 = FixedLine(indices1[1], direction=[0, 0, 1])   #if using oxygen, commennt constraint2
-    #slab.set_constraint([constraint1, constraint2])
-#else:
-    #slab.set_constraint([constraint1])
 
-#Add constaint1 to set constraint, i.e. change [constraint0] to [constraint0, constraint1]
+# Fix all the Cu atoms
+mask1 = [atom.symbol == 'Cu' for atom in slab]
+constraint0 = FixAtoms(mask=mask1)
+# Uncomment these lines to constrain the relaxation of adsorbate to the z axis
+indices1 = [atom.index for atom in slab if atom.symbol == 'C' or atom.symbol == 'O']
+constraint1 = FixedLine(indices1[0], direction=[0, 0, 1])
+if len(molecule1) == 2:
+    constraint2 = FixedLine(indices1[1], direction=[0, 0, 1])  # if using oxygen, commennt constraint2
+    slab.set_constraint([constraint0, constraint1, constraint2])
+else:
+    slab.set_constraint([constraint0, constraint1])
+
+# Add constaint1 to set constraint, i.e. change [constraint0] to [constraint0, constraint1]
 
 
 if emt:
@@ -116,7 +119,5 @@ Eb = (e_opt_slab - (e_opt_molecule + e_opt_surface))
 print("Binding Energy: ", Eb)
 
 # assert(abs(Eb - -0.173372) < 1e-5)
-
-
 
 view(slab)
