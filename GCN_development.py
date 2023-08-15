@@ -4,9 +4,11 @@ def coord_number(atoms, a=3.615, lattice='fcc'):
     # The list that stores the indices of first nearst neighbours for each atom
     # This will be a list of lists
     fnn_list = []
-    
+
     if lattice == 'fcc':
         bond = round(a / 2 ** 0.5, 3)
+    elif lattice == 'bcc':
+        bond = round(a * (3 ** 0.5) / 2, 3)
     # Hi Luca, you can try to add an if statement to make this function also works for bcc
 
     # Distances with minimum image conversion.
@@ -16,7 +18,7 @@ def coord_number(atoms, a=3.615, lattice='fcc'):
     for atom_i in atoms:
         i = atom_i.index
         cn = 0
-        #List for first nearest neighbours of atom i 
+        # List for first nearest neighbours of atom i
         fnn = []
         # Counting coordination number for atom i
         for atom_j in atoms:
@@ -29,12 +31,13 @@ def coord_number(atoms, a=3.615, lattice='fcc'):
             if round(distances[i][j], 3) == bond:
                 cn += 1
                 fnn.append(j)
-                
+
         # Append coordination number and first nearest neighbours to the lists every time the second j loop finishes.
         cn_list.append(cn)
         fnn_list.append(fnn)
 
     return cn_list, fnn_list
+
 
 def general_coord_number(atoms, a, lattice, site):
     """
@@ -47,11 +50,7 @@ def general_coord_number(atoms, a, lattice, site):
     # Hi Luca, you can try to complete this function for ontop sites using the coord_number function above.
     # The cn_max for fcc ontop sites is 12
 
-
     return gcn
-
-
-
 
 
 from ase.build import bulk, fcc111
@@ -60,4 +59,4 @@ Cu = bulk('Cu', crystalstructure='fcc', a=3.615, cubic=True)
 Cu = Cu.repeat((2, 2, 2))
 Cu111 = fcc111('Cu', a=3.615, size=(3, 3, 3), vacuum=10, periodic=True)
 gcn_fcc111 = general_coord_number(Cu111, a=3.615, lattice='fcc', site=[Cu111[-1].index])
-print(gcn_fcc111) #It should be 7.5
+print(gcn_fcc111)  # It should be 7.5
