@@ -9,7 +9,7 @@ def coord_number(atoms, a=3.615, lattice='fcc'):
         bond = round(a / 2 ** 0.5, 3)
     elif lattice == 'bcc':
         bond = round(a * (3 ** 0.5) / 2, 3)
-    # Hi Luca, you can try to add an if statement to make this function also works for bcc
+    # Add an if statement to make this function also works for bcc
 
     # Distances with minimum image conversion.
     # A big enough model is still needed, e.g. (3*3*3)
@@ -40,6 +40,7 @@ def coord_number(atoms, a=3.615, lattice='fcc'):
 
 
 def general_coord_number(atoms, a, lattice, site):
+
     """
     :param atoms: Surface model (should be large enough, e.g.(3*3*3))
     :param a: lattice parameter
@@ -47,16 +48,23 @@ def general_coord_number(atoms, a, lattice, site):
     :param site: An atomic index for an ontop site or a list of atomic indices for a multi-atom adsorption site.
     :return: gcn. Generalized coordination number
     """
-    # Hi Luca, you can try to complete this function for ontop sites using the coord_number function above.
-    # The cn_max for fcc ontop sites is 12
+
+    cn_max = 12
+    cn, fnn = coord_number(atoms, a, lattice)
+    fnn_site = fnn[site]  # extracting the fnn of the site
+    sum_fnn_cn = 0
+    for indices in fnn_site:
+        sum_fnn_cn += cn[indices]   # calculating cn(j)
+
+    gcn = sum_fnn_cn / cn_max   # dividing summation by cn_max (can do as cn_max is a constant)
 
     return gcn
 
 
-from ase.build import bulk, fcc111
+from ase.build import bulk, fcc111, fcc110, fcc100   # for fcc110, the gcn varies with size
 
 Cu = bulk('Cu', crystalstructure='fcc', a=3.615, cubic=True)
 Cu = Cu.repeat((2, 2, 2))
-Cu111 = fcc111('Cu', a=3.615, size=(3, 3, 3), vacuum=10, periodic=True)
-gcn_fcc111 = general_coord_number(Cu111, a=3.615, lattice='fcc', site=[Cu111[-1].index])
-print(gcn_fcc111)  # It should be 7.5
+Cuslab = fcc110('Cu', a=3.615, size=(5, 5, 5), vacuum=10, periodic=True)
+gcn = general_coord_number(Cuslab, a=3.615, lattice='fcc', site=Cuslab[-1].index)
+print(gcn)
